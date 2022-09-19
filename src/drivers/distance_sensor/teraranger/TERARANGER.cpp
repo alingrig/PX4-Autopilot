@@ -80,6 +80,7 @@ TERARANGER::TERARANGER(const I2CSPIDriverConfig &config) :
 {
 	_px4_rangefinder.set_device_type(DRV_DIST_DEVTYPE_TERARANGER);
 	_px4_rangefinder.set_rangefinder_type(distance_sensor_s::MAV_DISTANCE_SENSOR_LASER);
+	_px4_rangefinder.set_fov(0.034906f);
 }
 
 TERARANGER::~TERARANGER()
@@ -112,7 +113,7 @@ int TERARANGER::collect()
 	float distance_m = static_cast<float>(distance_mm) * 1e-3f;
 
 	if (crc8(val, 2) == val[2]) {
-		_px4_rangefinder.update(timestamp_sample, distance_m);
+		_px4_rangefinder.update(timestamp_sample, distance_m, -1, _px4_rangefinder.get_instance());
 
 	}
 
@@ -136,10 +137,10 @@ int TERARANGER::init()
 		return PX4_ERROR;
 
 	case 1: // Autodetect - assume default Teraranger One
-		set_device_address(TERARANGER_ONE_BASEADDR);
+		set_device_address(get_i2c_address());
 
 		if (I2C::init() != OK) {
-			set_device_address(TERARANGER_EVO_BASEADDR);
+			set_device_address(get_i2c_address());
 
 			if (I2C::init() != OK) {
 				return PX4_ERROR;
@@ -158,7 +159,7 @@ int TERARANGER::init()
 		break;
 
 	case 2: // Teraranger One.
-		set_device_address(TERARANGER_ONE_BASEADDR);
+		set_device_address(get_i2c_address());
 
 		if (I2C::init() != OK) {
 			return PX4_ERROR;
@@ -169,7 +170,7 @@ int TERARANGER::init()
 		break;
 
 	case 3: // Teraranger Evo60m.
-		set_device_address(TERARANGER_EVO_BASEADDR);
+		set_device_address(get_i2c_address());
 
 		// I2C init (and probe) first.
 		if (I2C::init() != OK) {
@@ -181,7 +182,7 @@ int TERARANGER::init()
 		break;
 
 	case 4: // Teraranger Evo600Hz.
-		set_device_address(TERARANGER_EVO_BASEADDR);
+		set_device_address(get_i2c_address());
 
 		// I2C init (and probe) first.
 		if (I2C::init() != OK) {
@@ -193,7 +194,7 @@ int TERARANGER::init()
 		break;
 
 	case 5: // Teraranger Evo3m.
-		set_device_address(TERARANGER_EVO_BASEADDR);
+		set_device_address(get_i2c_address());
 
 		// I2C init (and probe) first.
 		if (I2C::init() != OK) {
@@ -202,6 +203,7 @@ int TERARANGER::init()
 
 		_px4_rangefinder.set_min_distance(TERARANGER_EVO_3M_MIN_DISTANCE);
 		_px4_rangefinder.set_max_distance(TERARANGER_EVO_3M_MAX_DISTANCE);
+		_px4_rangefinder.set_fov(0.034906f);
 		break;
 
 	default:

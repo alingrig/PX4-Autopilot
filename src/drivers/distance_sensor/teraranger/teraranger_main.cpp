@@ -73,6 +73,7 @@ extern "C" __EXPORT int teraranger_main(int argc, char *argv[])
 			cli.rotation = (Rotation)atoi(cli.optArg());
 			break;
 		}
+
 	}
 
 	const char *verb = cli.optArg();

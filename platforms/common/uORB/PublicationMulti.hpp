@@ -79,6 +79,15 @@ public:
 		return advertised();
 	}
 
+	bool advertise_multi(int *instance)
+	{
+		if (!advertised()) {
+			_handle = orb_advertise_multi_queue(get_topic(), nullptr, instance, QSIZE);
+		}
+
+		return advertised();
+	}
+
 	/**
 	 * Publish the struct
 	 * @param data The uORB message struct we are updating.
@@ -90,6 +99,20 @@ public:
 		}
 
 		return (orb_publish(get_topic(), _handle, &data) == PX4_OK);
+	}
+
+	/**
+	 * Publish the struct
+	 * @param data The uORB message struct we are updating.
+	 * @param instance The instance number of the advertiser.
+	 */
+	bool publish_multi(const T &data, int *instance)
+	{
+		if (!advertised()) {
+			advertise_multi(instance);
+		}
+
+		return (Manager::orb_publish(get_topic(), _handle, &data) == PX4_OK);
 	}
 
 	int get_instance()
@@ -123,10 +146,16 @@ public:
 
 	// Publishes the embedded struct.
 	bool	update() { return PublicationMulti<T>::publish(_data); }
+	bool	update_multi(int *instance) { return PublicationMulti<T>::publish_multi(_data, instance); }
 	bool	update(const T &data)
 	{
 		_data = data;
 		return PublicationMulti<T>::publish(_data);
+	}
+	bool	update_multi(const T &data, int *instance)
+	{
+		_data = data;
+		return PublicationMulti<T>::publish_multi(_data, instance);
 	}
 
 private:
