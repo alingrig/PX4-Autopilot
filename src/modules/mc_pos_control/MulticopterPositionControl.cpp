@@ -45,6 +45,7 @@ MulticopterPositionControl::MulticopterPositionControl(bool vtol) :
 	SuperBlock(nullptr, "MPC"),
 	ModuleParams(nullptr),
 	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::nav_and_controllers),
+	_collision_prevention(this),
 	_vehicle_attitude_setpoint_pub(vtol ? ORB_ID(mc_virtual_attitude_setpoint) : ORB_ID(vehicle_attitude_setpoint)),
 	_vel_x_deriv(this, "VELD"),
 	_vel_y_deriv(this, "VELD"),
@@ -296,6 +297,30 @@ PositionControlStates MulticopterPositionControl::set_vehicle_states(const vehic
 	return states;
 }
 
+void MulticopterPositionControl::_collision_prevention_limit_setpoint(vehicle_local_position_s local_pos)
+{
+	//get velocity setpoints in case only positions are set
+	if (!PX4_ISFINITE(_setpoint.vx) || !PX4_ISFINITE(_setpoint.vy)) {
+		_setpoint.vx = _setpoint.x - local_pos.x;
+		_setpoint.vy = _setpoint.y - local_pos.y;
+	}
+
+	Vector2f vel_sp_original = Vector2f(_setpoint.vx, _setpoint.vy);
+	Vector2f vel_sp_modified = vel_sp_original;
+	// use the minimum of the estimator and user specified limit
+	float velocity_scale = fminf(_param_mpc_xy_vel_max.get(), local_pos.vxy_max);
+	// Allow for a minimum of 0.3 m/s for repositioning
+	velocity_scale = fmaxf(velocity_scale, 0.3f);
+
+	_collision_prevention.modifySetpoint(vel_sp_modified, velocity_scale, Vector2f(local_pos.x, local_pos.y),
+					     Vector2f(local_pos.vx, local_pos.vy));
+
+	_setpoint.vx = vel_sp_modified(0);
+	_setpoint.vy = vel_sp_modified(1);
+	_setpoint.x = NAN;
+	_setpoint.y = NAN;
+}
+
 void MulticopterPositionControl::Run()
 {
 	if (should_exit()) {
@@ -450,6 +475,11 @@ void MulticopterPositionControl::Run()
 				_param_mpc_xy_vel_max.get(),
 				math::min(speed_up, _param_mpc_z_vel_max_up.get()), // takeoff ramp starts with negative velocity limit
 				math::max(speed_down, 0.f));
+
+
+			if (_collision_prevention.is_active()) {
+				_collision_prevention_limit_setpoint(local_pos);
+			}
 
 			_control.setInputSetpoint(_setpoint);
 
