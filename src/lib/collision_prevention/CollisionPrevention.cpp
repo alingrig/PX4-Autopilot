@@ -78,7 +78,7 @@ CollisionPrevention::CollisionPrevention(ModuleParams *parent) :
 	_obstacle_map_body_frame.increment = INTERNAL_MAP_INCREMENT_DEG;
 	_obstacle_map_body_frame.min_distance = UINT16_MAX;
 	_obstacle_map_body_frame.max_distance = 0;
-	_obstacle_map_body_frame.angle_offset = 0.f;
+	_obstacle_map_body_frame.angle_offset = -90.f;
 	uint32_t internal_bins = sizeof(_obstacle_map_body_frame.distances) / sizeof(_obstacle_map_body_frame.distances[0]);
 	uint64_t current_time = getTime();
 

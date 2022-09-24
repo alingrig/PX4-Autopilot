@@ -64,6 +64,7 @@
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
+#include <lib/collision_prevention/CollisionPrevention.hpp>
 
 using namespace time_literals;
 
@@ -83,11 +84,13 @@ public:
 	/** @see ModuleBase */
 	static int print_usage(const char *reason = nullptr);
 
+	CollisionPrevention _collision_prevention;
+
 	bool init();
 
 private:
 	void Run() override;
-
+	void _collision_prevention_limit_setpoint(vehicle_local_position_s local_pos);
 	Takeoff _takeoff; /**< state machine and ramp to bring the vehicle off the ground without jumps */
 
 	orb_advert_t _mavlink_log_pub{nullptr};
