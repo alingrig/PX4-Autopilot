@@ -77,8 +77,7 @@ if [[ $INSTALL_NUTTX == "true" ]]; then
 
 	sudo pacman -S --noconfirm --needed \
 		gperf \
-		vim \
-		;
+		;#vim \
 
 	if [ ! -z "$USER" ]; then
 		# add user to dialout group (serial port access)
@@ -86,7 +85,7 @@ if [[ $INSTALL_NUTTX == "true" ]]; then
 	fi
 
 	# remove modem manager (interferes with PX4 serial port usage)
-	sudo pacman -R modemmanager --noconfirm
+	#sudo pacman -R modemmanager --noconfirm
 
 	# arm-none-eabi-gcc
 	NUTTX_GCC_VERSION="10-2020-q4-major"
