@@ -110,11 +110,11 @@ int TERARANGER::collect()
 	}
 
 	uint16_t distance_mm = (val[0] << 8) | val[1];
+	distance_mm = (distance_mm < 15) ? 65534 : distance_mm;
 	float distance_m = static_cast<float>(distance_mm) * 1e-3f;
 
 	if (crc8(val, 2) == val[2]) {
 		_px4_rangefinder.update(timestamp_sample, distance_m, -1, _px4_rangefinder.get_instance());
-
 	}
 
 	// Next phase is measurement.

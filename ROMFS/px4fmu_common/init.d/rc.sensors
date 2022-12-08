@@ -77,12 +77,6 @@ then
 	heater start
 fi
 
-# Teraranger one tof sensor
-if param greater -s SENS_EN_TRANGER 0
-then
-	teraranger start -X
-fi
-
 # paa3905 optical flow sensor (external SPI)
 if param greater -s SENS_EN_PAA3905 0
 then
@@ -197,4 +191,32 @@ then
 
 	# start last (wait for possible icm20948 passthrough mode)
 	ak09916 -X -q start
+fi
+
+# Teraranger one tof sensor FW
+if param greater -s SENS_EN_TRANGER 0
+then
+	teraranger start -X -R 0 -a 49
+    sleep 0.1
+fi
+
+# Teraranger one tof sensor RW
+if param greater -s SENS_EN_TRANGER 0
+then
+	teraranger start -X -R 2 -a 50
+    sleep 0.1
+fi
+
+# Teraranger one tof sensor LW
+if param greater -s SENS_EN_TRANGER 0
+then
+	teraranger start -X -R 6 -a 51
+    sleep 0.1
+fi
+
+# Teraranger one tof sensor BW
+if param greater -s SENS_EN_TRANGER 0
+then
+	teraranger start -X -R 4 -a 52
+    sleep 0.1
 fi
