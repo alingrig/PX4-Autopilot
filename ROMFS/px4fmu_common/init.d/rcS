@@ -547,7 +547,15 @@ else
 				set OUTPUT_MODE uavcan_esc
 			fi
 		else
-			tune_control play error
+			if uavcan start
+			then
+				if param greater UAVCAN_ENABLE 2
+				then
+					set OUTPUT_MODE uavcan_esc
+				fi
+			else
+				tune_control play error
+			fi
 		fi
 	else
 		if param greater -s UAVCAN_V1_ENABLE 0
